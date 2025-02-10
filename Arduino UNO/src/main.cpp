@@ -42,14 +42,14 @@ int main(void) {
     //Initialize PORTD as output
     DDRD = 0xFF;
     PORTD = 0x00;
-    //Initialize PORTC as output (PORTC2 - TRIG)
-    DDRD = 0xFF;
-    PORTD = 0x00;
-    //Initialize PORTB (PORTB0 - ECHO)
+    //Initialize PORTC (C2 - TRIG)
+    DDRC = 0xFF;
+    PORTC = 0x00;
+    //Initialize PORTB (B0 - ECHO)
     DDRB = 0b11111110;
     PORTB = 0b00000001;
 
-    serial_init(9600);
+    //serial_init(9600);
     sonar_init();
 
     unsigned char i = 0;
@@ -81,7 +81,13 @@ int TickFct_Sonar(int state) {
     switch (state) {
         // STATE TRANSITIONS
         case SONAR_INIT:
-            serial_println(sonar_read());
+            //serial_println(sonar_read());
+            if (sonar_read() < 20) {
+                PORTD = PORTD | 0x20;
+            }
+            else {
+                PORTD = PORTD & 0xDF;
+            }
             break;
 
         default:
