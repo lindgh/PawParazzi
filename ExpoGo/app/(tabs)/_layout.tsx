@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -34,12 +35,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="display"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Picture',
+          tabBarIcon: ({ color }) => <AntDesign name="picture" size={24} color="black" />,
         }}
-      />
+        />
     </Tabs>
   );
 }
