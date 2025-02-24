@@ -1,8 +1,11 @@
 #include "timerISR.h"
 #include "helper.h"
-#include "serialATmega.h"
+//#include "serialATmega.h"
+#include "queue.h"
 
-#define NUM_TASKS 3
+struct Queue* takePicture = createQueue(2);
+
+#define NUM_TASKS 2
 
 typedef struct _task{
 	signed 	 char state; 		//Task's current state
@@ -12,19 +15,16 @@ typedef struct _task{
 } task;
 
 const unsigned long SonarPeriod = 1;
-const unsigned long TakePicPeriod = 500;
-const unsigned long SendPicPeriod = 500;
+const unsigned long TakePicPeriod = 1000;
 const unsigned long GCD_PERIOD = 1;
 
 task tasks[NUM_TASKS];
 
 enum Sonar_States {SONAR_INIT};
 enum TakePic_States {TAKE_PICTURE};
-enum SendPic_States {SEND_PICTURE};
 
 int TickFct_Sonar(int state);
 int TickFct_TakePic(int state);
-int TickFct_SendPic(int state);
 
 void TimerISR() {
     
@@ -63,11 +63,6 @@ int main(void) {
     tasks[i].elapsedTime = tasks[i].period;
     tasks[i].TickFct = &TickFct_TakePic;
     ++i;
-    tasks[i].state = SEND_PICTURE;
-    tasks[i].period = SendPicPeriod;
-    tasks[i].elapsedTime = tasks[i].period;
-    tasks[i].TickFct = &TickFct_SendPic;
-    ++i;
 
     TimerSet(GCD_PERIOD);
     TimerOn();
@@ -81,13 +76,7 @@ int TickFct_Sonar(int state) {
     switch (state) {
         // STATE TRANSITIONS
         case SONAR_INIT:
-            //serial_println(sonar_read());
-            if (sonar_read() < 20) {
-                PORTD = PORTD | 0x20;
-            }
-            else {
-                PORTD = PORTD & 0xDF;
-            }
+            state = SONAR_INIT;
             break;
 
         default:
@@ -97,6 +86,12 @@ int TickFct_Sonar(int state) {
     switch (state) {
         // STATE ACTIONS
         case SONAR_INIT:
+            // serial_println(sonar_read());
+            if (sonar_read() < 20) {
+                if (isEmpty(takePicture)) {
+                    enqueue(takePicture, 1);
+                }
+            }
             break;
 
         default:
@@ -108,19 +103,30 @@ int TickFct_Sonar(int state) {
 int TickFct_TakePic(int state) {
     switch (state) {
         // STATE TRANSITIONS
-    }
-    switch (state) {
-        // STATE ACTIONS
-    }
-    return state;
-}
+        case TAKE_PICTURE:
+            state = TAKE_PICTURE;
+            break;
 
-int TickFct_SendPic(int state) {
-    switch (state) {
-        // STATE TRANSITIONS
+        default:
+            state = TAKE_PICTURE;
+            break;
     }
     switch (state) {
         // STATE ACTIONS
+        case TAKE_PICTURE:
+            if (!isEmpty(takePicture)) {
+                //serial_println(1);
+                PORTD = PORTD | 0x20;
+                dequeue(takePicture);
+            }
+            if (isEmpty(takePicture)) {
+                PORTD = PORTD & 0xDF;
+            }
+            break;
+
+        default:
+            state = TAKE_PICTURE;
+            break;
     }
     return state;
 }
