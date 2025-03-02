@@ -1,31 +1,45 @@
-import { StyleSheet, Text, View, Image, Dimensions} from "react-native"
-import React, {useEffect, useState} from "react"
-import { ImageSlider, ImageSliderType } from '../data/SliderData'
-import storage from '@react-native-firebase/storage';
+import { StyleSheet, View, Image, Dimensions, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ImageSliderType } from '../data/SliderData';
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 type Props = {
     item: ImageSliderType;
     index: number;
-}
+};
 
-const {width} = Dimensions.get('screen');
+const { width } = Dimensions.get('screen');
 
-const SliderItem = ({item, index}: Props) => {
+const SliderItem = ({ item }: Props) => {
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+    useEffect(() => {
+        const fetchImageUrl = async () => {
+            try {
+                const storage = getStorage();
+                const reference = ref(storage, item.imageName);
+                const url = await getDownloadURL(reference);
+                setImageUrl(url);
+            } catch (error) {
+                console.error("Error fetching image:", error);
+            }
+        };
+
+        fetchImageUrl();
+    }, [item.imageName]);
 
     return (
-        <View style = {styles.itemContainer}>
-            <Image source = {item.image} style = {{width: 300, height: 500}} />
-            <Text>{item.title}</Text>
-
-            {/* <Image source = {{uri: 'https://firebasestorage.googleapis.com/v0/b/pawparazzi-bearjeans.firebasestorage.app/o/images%2Fakali.jpg?alt=media&token=4e556bf4-0d2d-4717-bdc9-9c8ad94076c4'}}
-                    style = {{width: 300, height: 500}} />*/}
+        <View style={styles.itemContainer}>
+            {imageUrl ? (
+                <Image source={{ uri: imageUrl }} style={styles.image} />
+            ) : (
+                <ActivityIndicator size="large" color="#0000ff" />
+            )}
         </View>
+    );
+};
 
-    )   
-}
-
-export default SliderItem
+export default SliderItem;
 
 const styles = StyleSheet.create({
     itemContainer: {
@@ -34,5 +48,10 @@ const styles = StyleSheet.create({
         gap: 20,
         width: width,
         backgroundColor: '#c8a7a2'
+    },
+    image: {
+        width: 300,
+        height: 500,
+        borderRadius: 7,
     }
-})
+});

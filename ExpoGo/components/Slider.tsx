@@ -1,24 +1,41 @@
-import { StyleSheet, Text, View, FlatList} from "react-native"
-import React from "react"
-import { ImageSlider } from '../data/SliderData'
-import SliderItem from "./SliderItem"
+import { StyleSheet, View, FlatList, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ImageSliderType, getImageSliderData } from "../data/SliderData";
+import SliderItem from "./SliderItem";
 
 const Slider = () => {
+    const [sliderData, setSliderData] = useState<ImageSliderType[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await getImageSliderData();
+            setSliderData(data);
+            setLoading(false);
+        };
+
+        fetchData();
+    }, []);
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" />;
+    }
+
     return (
         <View>
             <FlatList
-                data = {ImageSlider}
-                renderItem = {({item, index}) => (
-                    <SliderItem item = {item} index = {index}/>
+                data={sliderData}
+                renderItem={({ item, index }) => (
+                    <SliderItem item={item} index={index} />
                 )}
                 horizontal
-                showsHorizontalScrollIndicator = {false}
+                showsHorizontalScrollIndicator={false}
                 pagingEnabled
             />
         </View>
-    )   
-}
+    );
+};
 
-export default Slider
+export default Slider;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
