@@ -1,5 +1,5 @@
 import Slider from "@/components/Slider"
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import React, { useState, useEffect } from 'react'
 
 const showSlider = () => {
@@ -17,6 +17,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'c8a7a2'
+        backgroundColor: '#c8a7a2'
     }
 })

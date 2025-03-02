@@ -8,7 +8,7 @@ type Props = {
     index: number;
 };
 
-const { width } = Dimensions.get('screen');
+const { width, height } = Dimensions.get('window');
 
 const SliderItem = ({ item }: Props) => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -46,12 +46,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         gap: 20,
+        height: height,
         width: width,
-        backgroundColor: '#c8a7a2'
     },
     image: {
-        width: 300,
-        height: 500,
-        borderRadius: 7,
+        width: width,
+        height: height,
+        resizeMode: 'contain',
+        padding: 20
     }
 });
