@@ -1,11 +1,20 @@
 import Slider from "@/components/Slider"
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Image, Dimensions } from 'react-native';
 import React, { useState, useEffect } from 'react'
+
+const { width, height } = Dimensions.get('window');
 
 const showSlider = () => {
     return (
         <View style = {styles.container}>
-            <Slider/>
+            <Image 
+            source={require('../../assets/images/pawparazzi-logo.png')}
+            style={styles.tinyLogo} 
+            />
+            <Text style={styles.text}>Fetching the latest picture of your furry friend!</Text>
+            <View style={{marginTop: -275}}>
+                <Slider/>
+            </View>
         </View>
     )
 }
@@ -17,6 +26,18 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#c8a7a2'
+        backgroundColor: '#c8a7a2',
+        resizeMode: 'contain'
+    },
+    tinyLogo: {
+        marginTop: 450,
+        width: '80%',
+        height: '10%',
+        resizeMode: 'cover',
+    },
+    text: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'white',
     }
 })
