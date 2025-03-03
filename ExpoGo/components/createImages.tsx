@@ -19,7 +19,7 @@ export const Page = ({ image_name } : {image_name:string}) => {
         fetchImageUrl();
     }, [image_name]);
 
-    return url ? <img src = { url } alt = "Fetched from Firebae" /> : <p>Loading...</p>
+    return url ? <img src = { url } alt = "Fetched from Firebase" /> : <p>Loading...</p>
 }
 
 let file = "photoCount.txt";
@@ -29,7 +29,6 @@ const getPhotoAmount = async () => {
     const downloadUrl = await getDownloadURL(file_ref);
     const response = await fetch(downloadUrl);
     const text = await response.text();
-    console.log(text);
     return text;
 }
 

@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, Dimensions } from 'react-native';
 import React, { useState, useEffect } from 'react'
 
 const { width, height } = Dimensions.get('window');
-
+const output_text = "Fetching the latest picture\nof your furry friend!";
 const showSlider = () => {
     return (
         <View style = {styles.container}>
@@ -11,7 +11,7 @@ const showSlider = () => {
             source={require('../../assets/images/pawparazzi-logo.png')}
             style={styles.tinyLogo} 
             />
-            <Text style={styles.text}>Fetching the latest picture of your furry friend!</Text>
+            <Text style={[styles.text, {textAlign: 'center'}]}>{output_text}</Text>
             <View style={{marginTop: -275}}>
                 <Slider/>
             </View>
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         resizeMode: 'contain'
     },
     tinyLogo: {
-        marginTop: 450,
+        marginTop: 475,
         width: '80%',
         height: '10%',
         resizeMode: 'cover',
@@ -39,5 +39,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         color: 'white',
+        justifyContent: 'center',
     }
 })
