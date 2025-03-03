@@ -22,10 +22,22 @@ export const Page = ({ image_name } : {image_name:string}) => {
     return url ? <img src = { url } alt = "Fetched from Firebae" /> : <p>Loading...</p>
 }
 
-export const createImages = (): string[] => {
-    let imageNames: string[] = [];
+let file = "photoCount.txt";
+const getPhotoAmount = async () => {
+    const storage = getStorage();
+    const file_ref = ref(storage, file);
+    const downloadUrl = await getDownloadURL(file_ref);
+    const response = await fetch(downloadUrl);
+    const text = await response.text();
+    console.log(text);
+    return text;
+}
 
-    for (let i = 1; i < 4; i++) {
+export const createImages = async (): Promise<string[]> => {
+    let imageNames: string[] = [];
+    let photo_count = parseInt(await getPhotoAmount());
+
+    for (let i = 1; i < photo_count  + 1; i++) {
         let image_name = 'images/photo';
         image_name += i;
         image_name += '.jpg';
