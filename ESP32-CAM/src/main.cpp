@@ -22,8 +22,8 @@
 #include <addons/TokenHelper.h>
 
 //Network credentials
-//const char* ssid = "";
-//const char* password = "";
+const char* ssid = "";
+const char* password = "";
 
 // Firebase project API Key
 #define API_KEY "AIzaSyC41_QcR4QqxEZA1h5f7Ln3IspSCcOpl5A"
@@ -39,8 +39,9 @@
 #define FILE_PHOTO_PATH "/photo.jpg"
 #define BUCKET_PHOTO "/images/photo.jpg"
 
-// UNO Input Pin
-#define ARDUINO_INPUT 2
+// UNO Input Pins
+#define PICTURE_INPUT 14
+#define UPLOAD_INPUT 2
 
 // OV2640 camera module pins (CAMERA_MODEL_AI_THINKER)
 #define PWDN_GPIO_NUM     32
@@ -60,7 +61,6 @@
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
-boolean takeNewPhoto = false;
 
 //Define Firebase Data objects
 FirebaseData fbdo;
@@ -69,6 +69,7 @@ FirebaseConfig configF;
 
 void fcsUploadCallback(FCS_UploadStatusInfo info);
 
+bool takeNewPhoto = false;
 bool taskCompleted = false;
 
 // Capture Photo and Save it to LittleFS
@@ -177,7 +178,8 @@ void setup() {
   // Serial port for debugging purposes
   Serial.begin(115200);
   
-  pinMode(ARDUINO_INPUT, INPUT);
+  pinMode(PICTURE_INPUT, INPUT);
+  pinMode(UPLOAD_INPUT, INPUT);
 
   initWiFi();
   initLittleFS();
@@ -200,30 +202,30 @@ void setup() {
 
 void loop() {
   
-  if (digitalRead(ARDUINO_INPUT)) {
+  if (digitalRead(PICTURE_INPUT)) {
     taskCompleted = false;
     takeNewPhoto = true;
-    Serial.print("Input received from UNO.");
+    Serial.print("Picture taken.");
     delay(2000);
   }
 
   if (takeNewPhoto) {
     capturePhotoSaveLittleFS();
     takeNewPhoto = false;
-
     delay(1);
-    if (Firebase.ready() && !taskCompleted){
-      taskCompleted = true;
-      Serial.print("Uploading picture... ");
-  
-      //MIME type should be valid to avoid the download problem.
-      //The file systems for flash and SD/SDMMC can be changed in FirebaseFS.h.
-      if (Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, FILE_PHOTO_PATH /* path to local file */, mem_storage_type_flash /* memory storage type, mem_storage_type_flash and mem_storage_type_sd */, BUCKET_PHOTO /* path of remote file stored in the bucket */, "image/jpeg" /* mime type */,fcsUploadCallback)){
-        Serial.printf("\nDownload URL: %s\n", fbdo.downloadURL().c_str());
-      }
-      else{
-        Serial.println(fbdo.errorReason());
-      }
+  }
+
+  if(Firebase.ready() && !taskCompleted && digitalRead(UPLOAD_INPUT)) {
+    taskCompleted = true;
+    Serial.print("Uploading picture...");
+
+    //MIME type should be valid to avoid the download problem.
+    //The file systems for flash and SD/SDMMC can be changed in FirebaseFS.h.
+    if (Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, FILE_PHOTO_PATH /* path to local file */, mem_storage_type_flash /* memory storage type, mem_storage_type_flash and mem_storage_type_sd */, BUCKET_PHOTO /* path of remote file stored in the bucket */, "image/jpeg" /* mime type */,fcsUploadCallback)){
+      Serial.printf("\nDownload URL: %s\n", fbdo.downloadURL().c_str());
+    }
+    else{
+      Serial.println(fbdo.errorReason());
     }
   }
 }
