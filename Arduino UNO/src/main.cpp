@@ -1,11 +1,8 @@
 #include "timerISR.h"
 #include "helper.h"
 //#include "serialATmega.h"
-#include "queue.h"
 
-struct Queue* takePicture = createQueue(2);
-
-#define NUM_TASKS 2
+#define NUM_TASKS 1
 
 typedef struct _task{
 	signed 	 char state; 		//Task's current state
@@ -14,17 +11,14 @@ typedef struct _task{
 	int (*TickFct)(int); 		//Task tick function
 } task;
 
-const unsigned long SonarPeriod = 1;
-const unsigned long TakePicPeriod = 1000;
-const unsigned long GCD_PERIOD = 1;
+const unsigned long SonarPeriod = 250;
+const unsigned long GCD_PERIOD = 250;
 
 task tasks[NUM_TASKS];
 
-enum Sonar_States {SONAR_INIT};
-enum TakePic_States {TAKE_PICTURE};
+enum Sonar_States {SONAR_INIT, TAKE_PICTURE, COUNT, UPLOAD_PICTURE};
 
 int TickFct_Sonar(int state);
-int TickFct_TakePic(int state);
 
 void TimerISR() {
     
@@ -58,11 +52,6 @@ int main(void) {
     tasks[i].elapsedTime = tasks[i].period;
     tasks[i].TickFct = &TickFct_Sonar;
     ++i;
-    tasks[i].state = TAKE_PICTURE;
-    tasks[i].period = TakePicPeriod;
-    tasks[i].elapsedTime = tasks[i].period;
-    tasks[i].TickFct = &TickFct_TakePic;
-    ++i;
 
     TimerSet(GCD_PERIOD);
     TimerOn();
@@ -73,9 +62,37 @@ int main(void) {
 }
 
 int TickFct_Sonar(int state) {
+    static int count;
+
     switch (state) {
         // STATE TRANSITIONS
         case SONAR_INIT:
+            if ((sonar_read() >= 15) && (sonar_read() <= 30)) {
+                state = TAKE_PICTURE;
+            }
+            else {
+                state = SONAR_INIT;
+            }
+            break;
+
+        case TAKE_PICTURE:
+            state = COUNT;
+            break;
+
+        case COUNT:
+            if (count > 12) {
+                //in front of sensor for at least 3 seconds
+                state = UPLOAD_PICTURE;
+            }
+            else if (sonar_read() < 20) {
+                state = COUNT;
+            }
+            else {
+                state = SONAR_INIT;
+            }
+            break;
+
+        case UPLOAD_PICTURE:
             state = SONAR_INIT;
             break;
 
@@ -86,46 +103,30 @@ int TickFct_Sonar(int state) {
     switch (state) {
         // STATE ACTIONS
         case SONAR_INIT:
-            // serial_println(sonar_read());
-            if (sonar_read() < 20) {
-                if (isEmpty(takePicture)) {
-                    enqueue(takePicture, 1);
-                }
-            }
+            //serial_println("Initialized");
+            PORTD = PORTD & 0x00;    //turn the picture bit off
+                                     //turn the upload bit off
+            count = 0;
             break;
 
-        default:
-            break;
-    }
-    return state;
-}
-
-int TickFct_TakePic(int state) {
-    switch (state) {
-        // STATE TRANSITIONS
         case TAKE_PICTURE:
-            state = TAKE_PICTURE;
+            //serial_println("Picture taken");
+            PORTD = PORTD | 0x04; //turn the picture bit on
+            break;
+
+        case COUNT:
+            PORTD = PORTD & 0x00; //turn the picture bit off
+            //serial_println(count);
+            ++count;
+            break;
+
+        case UPLOAD_PICTURE:
+            //serial_println("Upload picture");
+            count = 0;
+            PORTD = PORTD | 0x08; //turn the upload bit on
             break;
 
         default:
-            state = TAKE_PICTURE;
-            break;
-    }
-    switch (state) {
-        // STATE ACTIONS
-        case TAKE_PICTURE:
-            if (!isEmpty(takePicture)) {
-                //serial_println(1);
-                PORTD = PORTD | 0x20;
-                dequeue(takePicture);
-            }
-            if (isEmpty(takePicture)) {
-                PORTD = PORTD & 0xDF;
-            }
-            break;
-
-        default:
-            state = TAKE_PICTURE;
             break;
     }
     return state;
