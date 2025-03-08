@@ -1,4 +1,8 @@
-import { View, Text, StyleSheet, TextInput, SafeAreaView, TouchableOpacity } from 'react-native'
+// Credit to Andrew Heim for the general framework
+// https://www.youtube.com/watch?v=a0KJ7l5sNGw
+// https://github.com/andepants/firebase-expo-guide
+
+import {Image, Text, StyleSheet, TextInput, SafeAreaView, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { auth } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
@@ -29,6 +33,7 @@ const index = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Image source={require('../assets/images/pawparazzi-logo.png')} style={styles.tinyLogo} />
       <Text style={styles.title}>Login</Text>
       <TextInput style={styles.textInput} placeholder="email" value={email} onChangeText={setEmail} />
       <TextInput style={styles.textInput} placeholder="password" value={password} onChangeText={setPassword} secureTextEntry/>
@@ -49,48 +54,54 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FAFAFA', // A softer white for a modern, minimalist background
+    backgroundColor: '#c8a7a2',
   },
   title: {
-    fontSize: 28, // A bit larger for a more striking appearance
-    fontWeight: '800', // Extra bold for emphasis
-    marginBottom: 40, // Increased space for a more airy, open feel
-    color: '#1A237E', // A deep indigo for a sophisticated, modern look
+    fontSize: 28,
+    fontWeight: '800',
+    marginBottom: 40,
+    color: '#7d5851',
   },
   textInput: {
-    height: 50, // Standard height for elegance and simplicity
-    width: '90%', // Full width for a more expansive feel
-    backgroundColor: '#FFFFFF', // Pure white for contrast against the container
-    borderColor: '#E8EAF6', // A very light indigo border for subtle contrast
+    height: 50, 
+    width: '90%',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E8EAF6', 
     borderWidth: 2,
-    borderRadius: 15, // Softly rounded corners for a modern, friendly touch
+    borderRadius: 15, 
     marginVertical: 15,
-    paddingHorizontal: 25, // Generous padding for ease of text entry
-    fontSize: 16, // Comfortable reading size
-    color: '#3C4858', // A dark gray for readability with a hint of warmth
-    shadowColor: '#9E9E9E', // A medium gray shadow for depth
+    paddingHorizontal: 25, 
+    fontSize: 16, 
+    color: '#3C4858', 
+    shadowColor: '#9E9E9E', 
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 4, // Slightly elevated for a subtle 3D effect
+    elevation: 4, 
   },
   button: {
     width: '90%',
     marginVertical: 15,
-    backgroundColor: '#5C6BC0', // A lighter indigo to complement the title color
+    backgroundColor: '#bf867c', 
     padding: 20,
-    borderRadius: 15, // Matching rounded corners for consistency
+    borderRadius: 15, 
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#5C6BC0', // Shadow color to match the button for a cohesive look
+    shadowColor: '#5C6BC0', 
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 5,
     elevation: 5,
   },
   text: {
-    color: '#FFFFFF', // Maintained white for clear visibility
-    fontSize: 18, // Slightly larger for emphasis
-    fontWeight: '600', // Semi-bold for a balanced weight
-  }
+    color: '#FFFFFF', 
+    fontSize: 18, 
+    fontWeight: '600',  
+  },
+  tinyLogo: {
+    marginTop: 0,
+    width: '80%',
+    height: '10%',
+    resizeMode: 'cover',
+},
 });

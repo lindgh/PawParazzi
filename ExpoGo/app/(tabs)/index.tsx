@@ -1,8 +1,7 @@
 import Slider from "@/components/Slider"
 import { StyleSheet, View, Text, Image, Dimensions } from 'react-native';
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 
-const { width, height } = Dimensions.get('window');
 const output_text = "Fetching the latest picture\nof your furry friend!";
 const showSlider = () => {
     return (

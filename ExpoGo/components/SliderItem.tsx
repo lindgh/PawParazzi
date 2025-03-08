@@ -1,3 +1,5 @@
+// Credit to Pradip Debnath
+// https://www.youtube.com/watch?v=wIh60UQzUKY&t=338s
 import { StyleSheet, View, Image, Dimensions, ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
 import { ImageSliderType } from '../data/SliderData';
