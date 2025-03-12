@@ -8,7 +8,7 @@
   Based on the example provided by the ESP Firebase Client Library
 *********/
 
-/* Modified for use in PawParazzi project by Emily Hix (@emilyhix) */
+/* Modified for use in PawParazzi project by Emily Hix (@emilyhix) and Linda Ghunaim (@lindgh) */
 
 #include "Arduino.h"
 #include "WiFi.h"
@@ -20,6 +20,8 @@
 #include <FS.h>
 #include <Firebase_ESP_Client.h>
 #include <addons/TokenHelper.h>
+#include <string.h>
+#include <stdio.h>
 
 //Network credentials
 const char* ssid = "";
@@ -35,9 +37,6 @@ const char* password = "";
 // Firebase storage bucket ID 
 #define STORAGE_BUCKET_ID "pawparazzi-bearjeans.firebasestorage.app"
 
-// Photo File Name to save in LittleFS (File System)
-#define FILE_PHOTO_PATH "/photo.jpg"
-#define BUCKET_PHOTO "/images/photo.jpg"
 
 // UNO Input Pins
 #define PICTURE_INPUT 14
@@ -72,12 +71,32 @@ void fcsUploadCallback(FCS_UploadStatusInfo info);
 bool takeNewPhoto = false;
 bool taskCompleted = false;
 
+void writeFile(fs::FS &fs, const char * path, const char * message){
+  Serial.printf("Writing file: %s\r\n", path);
+
+  File file = fs.open(path, FILE_WRITE);
+  if(!file){
+    Serial.println("- failed to open file for writing");
+    return;
+  }
+  if(file.print(message)){
+    Serial.println("- file written");
+  } else {
+    Serial.println("- write failed");
+  }
+  file.close();
+}
+
+int num_photos = 0;
+char buffer_path [50];
+char buffer_bucket_path [50];
+
 // Capture Photo and Save it to LittleFS
 void capturePhotoSaveLittleFS( void ) {
   // Dispose first pictures because of bad quality
   camera_fb_t* fb = NULL;
   // Skip first 3 frames (increase/decrease number as needed).
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 11; i++) {
     fb = esp_camera_fb_get();
     esp_camera_fb_return(fb);
     fb = NULL;
@@ -93,8 +112,12 @@ void capturePhotoSaveLittleFS( void ) {
   }  
 
   // Photo file name
-  Serial.printf("Picture file name: %s\n", FILE_PHOTO_PATH);
-  File file = LittleFS.open(FILE_PHOTO_PATH, FILE_WRITE);
+  ++num_photos;
+  sprintf(buffer_path, "/photo%d.jpg", num_photos);
+  sprintf(buffer_bucket_path, "/images/photo%d.jpg", num_photos);
+
+  Serial.printf("Picture file name: %s\n", buffer_path);
+  File file = LittleFS.open(buffer_path, FILE_WRITE);
 
   // Insert the data in the photo file
   if (!file) {
@@ -103,7 +126,7 @@ void capturePhotoSaveLittleFS( void ) {
   else {
     file.write(fb->buf, fb->len); // payload (image), payload length
     Serial.print("The picture has been saved in ");
-    Serial.print(FILE_PHOTO_PATH);
+    Serial.print(buffer_path);
     Serial.print(" - Size: ");
     Serial.print(fb->len);
     Serial.println(" bytes");
@@ -209,6 +232,14 @@ void loop() {
     delay(2000);
   }
 
+  //TESTING, RM - LINDA
+  // if (num_photos == 0) {
+  //   taskCompleted = false;
+  //   takeNewPhoto = true;
+  //   Serial.print("Picture taken.");
+  //   delay(2000);
+  // }
+
   if (takeNewPhoto) {
     capturePhotoSaveLittleFS();
     takeNewPhoto = false;
@@ -221,12 +252,30 @@ void loop() {
 
     //MIME type should be valid to avoid the download problem.
     //The file systems for flash and SD/SDMMC can be changed in FirebaseFS.h.
-    if (Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, FILE_PHOTO_PATH /* path to local file */, mem_storage_type_flash /* memory storage type, mem_storage_type_flash and mem_storage_type_sd */, BUCKET_PHOTO /* path of remote file stored in the bucket */, "image/jpeg" /* mime type */,fcsUploadCallback)){
+    Serial.printf("Download path of photo :3... %s\n", buffer_path);
+    Serial.printf("Bucket path of photo :3... %s\n", buffer_bucket_path);
+
+    //UPLOAD PHOTO
+    if (Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, buffer_path /* path to local file */, mem_storage_type_flash /* memory storage type, mem_storage_type_flash and mem_storage_type_sd */, buffer_bucket_path /* path of remote file stored in the bucket */, "image/jpeg" /* mime type */,fcsUploadCallback)){
       Serial.printf("\nDownload URL: %s\n", fbdo.downloadURL().c_str());
     }
     else{
       Serial.println(fbdo.errorReason());
     }
+
+    //UPLOAD COUNT FILE
+    char buffer2 [10];
+    sprintf(buffer2, "%d", num_photos);
+
+    writeFile(LittleFS, "/count.txt", buffer2);
+
+    if (Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, "/count.txt" /* path to local file */, mem_storage_type_flash /* memory storage type, mem_storage_type_flash and mem_storage_type_sd */, "data/count.txt" /* path of remote file stored in the bucket */, "text/plain" /* mime type */,fcsUploadCallback)){
+      Serial.printf("\nDownload URL: %s\n", fbdo.downloadURL().c_str());
+    }
+    else{
+      Serial.println(fbdo.errorReason());
+    }
+    
   }
 }
 
