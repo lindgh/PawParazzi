@@ -22,7 +22,7 @@ export const Page = ({ image_name } : {image_name:string}) => {
     return url ? <img src = { url } alt = "Fetched from Firebase" /> : <p>Loading...</p>
 }
 
-let file = "photoCount.txt";
+let file = "data/count.txt";
 const getPhotoAmount = async () => {
     const storage = getStorage();
     const file_ref = ref(storage, file);
@@ -36,7 +36,7 @@ export const createImages = async (): Promise<string[]> => {
     let imageNames: string[] = [];
     let photo_count = parseInt(await getPhotoAmount());
 
-    for (let i = 1; i < photo_count  + 1; i++) {
+    for (let i = photo_count; i > 0; i--) {
         let image_name = 'images/photo';
         image_name += i;
         image_name += '.jpg';
