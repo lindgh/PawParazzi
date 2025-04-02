@@ -1,7 +1,7 @@
 # PawParazzi
 > Authors: [Linda Ghunaim](https://github.com/lindgh), [Sabaipon Phimmala](https://github.com/bphimmala), [Emily Hix](https://github.com/emilyhix)
 
-PawParazzi is an embedded system that allows you to stay connected with your pet even when you’re away! PawParazzi is a smart food bowl that detects when your pet is eating and captures a picture. The photo captures of your furry friend are available to see in the PawParazzi mobile app.
+Stay connected with your pet even when you’re away! PawParazzi is a smart food bowl that detects when your pet is eating and captures a picture. The photo captures of your furry friend are available to see in the PawParazzi mobile app.
 
 The goal of PawParazzi was to demonstrate full-stack system design. The Arduino UNO, ultrasonic sensor, and ESP32-CAM are integrated with Firebase cloud storage to capture, store, and display images in real-time on our React Native mobile app.
 
@@ -13,3 +13,6 @@ The goal of PawParazzi was to demonstrate full-stack system design. The Arduino 
   
  ## Demo
 https://github.com/user-attachments/assets/703fa4a9-b0ff-4d37-8ec1-8aa240fab8f2
+
+![PawParazziDemo1](https://github.com/user-attachments/assets/31bff426-ec63-4d49-9ceb-e477e1023a15)
+![PawParazziDemo2](https://github.com/user-attachments/assets/64e9d89d-01ec-409e-9d9e-4bf5f2c406a1)
